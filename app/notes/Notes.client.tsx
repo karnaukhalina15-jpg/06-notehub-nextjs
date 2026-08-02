@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDebounce } from "use-debounce";
 import { useQuery } from "@tanstack/react-query";
 import { fetchNotes } from "@/lib/api";
 import NoteList from "@/components/NoteList/NoteList";
@@ -20,6 +21,14 @@ export default function NotesClient() {
     queryFn: () => fetchNotes({ page, perPage: 12, search }),
     refetchOnMount: false,
   });
+  const [debouncedQuery] = useDebounce(search, 500);
+
+  useEffect(() => {
+    fetchNotes({
+      page,
+      search: debouncedQuery,
+    });
+  }, [page, debouncedQuery]);
 
   const handleSearchChange = (newSearch: string) => {
     setSearch(newSearch);

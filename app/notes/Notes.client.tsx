@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDebounce } from "use-debounce";
 import { useQuery } from "@tanstack/react-query";
 import { fetchNotes } from "@/lib/api";
@@ -16,19 +16,13 @@ export default function NotesClient() {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["notes", page, search],
-    queryFn: () => fetchNotes({ page, perPage: 12, search }),
-    refetchOnMount: false,
-  });
   const [debouncedQuery] = useDebounce(search, 500);
 
-  useEffect(() => {
-    fetchNotes({
-      page,
-      search: debouncedQuery,
-    });
-  }, [page, debouncedQuery]);
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["notes", page, debouncedQuery],
+    queryFn: () => fetchNotes({ page, perPage: 12, search: debouncedQuery }),
+    refetchOnMount: false,
+  });
 
   const handleSearchChange = (newSearch: string) => {
     setSearch(newSearch);
@@ -58,9 +52,11 @@ export default function NotesClient() {
 
       {data && data.notes.length > 0 && <NoteList notes={data.notes} />}
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <NoteForm onClose={() => setIsModalOpen(false)} />
-      </Modal>
+      {isModalOpen && (
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <NoteForm onClose={() => setIsModalOpen(false)} />
+        </Modal>
+      )}
     </div>
   );
 }

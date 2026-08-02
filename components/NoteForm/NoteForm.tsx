@@ -82,7 +82,13 @@ const NoteForm = ({ onClose }: NoteFormProps) => {
             <ErrorMessage name="tag" component="span" className={css.error} />
           </div>
 
-          {/* Розмітка кнопок рівно така, як вимагає ТЗ на скриншоті */}
+          {createMutation.isError && (
+            <div className={css.errorMessage}>
+              {createMutation.error instanceof Error
+                ? createMutation.error.message
+                : "An error occurred while creating the note."}
+            </div>
+          )}
           <div className={css.actions}>
             <button
               type="button"
